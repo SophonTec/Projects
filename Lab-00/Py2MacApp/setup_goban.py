@@ -5,6 +5,6 @@ PyInstaller.__main__.run(
         './src/goban/goban.py',
         '--onefile',
         '--windowed',
-        '--icon=./src/goban/goban.icns'
+        '--icon=./src/goban/goban.ico'
     ]
 )

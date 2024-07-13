@@ -1,6 +1,8 @@
 import pygame
 import os, sys
 import random
+from pathlib import Path
+
 pygame.init()
 
 # Global Constants
@@ -8,25 +10,25 @@ SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 1100
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-RUNNING = [pygame.image.load(os.path.join("Assets/Dino", "DinoRun1.png")),
-           pygame.image.load(os.path.join("Assets/Dino", "DinoRun2.png"))]
-JUMPING = pygame.image.load(os.path.join("Assets/Dino", "DinoJump.png"))
-DUCKING = [pygame.image.load(os.path.join("Assets/Dino", "DinoDuck1.png")),
-           pygame.image.load(os.path.join("Assets/Dino", "DinoDuck2.png"))]
+RUNNING = [pygame.image.load(Path("Assets/Dino/DinoRun1.png")),
+           pygame.image.load(Path("Assets/Dino/DinoRun2.png"))]
+JUMPING = pygame.image.load(Path("Assets/Dino/DinoJump.png"))
+DUCKING = [pygame.image.load(Path("Assets/Dino/DinoDuck1.png")),
+           pygame.image.load(Path("Assets/Dino/DinoDuck2.png"))]
 
-SMALL_CACTUS = [pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus1.png")),
-                pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus2.png")),
-                pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus3.png"))]
-LARGE_CACTUS = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.png")),
-                pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus2.png")),
-                pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus3.png"))]
+SMALL_CACTUS = [pygame.image.load(Path("Assets/Cactus/SmallCactus1.png")),
+                pygame.image.load(Path("Assets/Cactus/SmallCactus2.png")),
+                pygame.image.load(Path("Assets/Cactus/SmallCactus3.png"))]
+LARGE_CACTUS = [pygame.image.load(Path("Assets/Cactus/LargeCactus1.png")),
+                pygame.image.load(Path("Assets/Cactus/LargeCactus2.png")),
+                pygame.image.load(Path("Assets/Cactus/LargeCactus3.png"))]
 
-BIRD = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
-        pygame.image.load(os.path.join("Assets/Bird", "Bird2.png"))]
+BIRD = [pygame.image.load(Path("Assets/Bird/Bird1.png")),
+        pygame.image.load(Path("Assets/Bird/Bird2.png"))]
 
-CLOUD = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
+CLOUD = pygame.image.load(Path("Assets/Other/Cloud.png"))
 
-BG = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
+BG = pygame.image.load(Path("Assets/Other/Track.png"))
 BACKGROUND_COLOR = (173, 216, 230)  # Light blue color
 INIT_GAME_SPEED = 20
 GAME_SPEED_INC_FREQ = 200

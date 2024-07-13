@@ -6,7 +6,7 @@ PyInstaller.__main__.run(
         '--onedir',
         '--windowed',
         '--add-data=./src/dino/Assets:Assets',
-        '--icon=./src/dino/dino-icon.icns',
+        '--icon=./src/dino/dino-icon.ico',
         '--log-level=DEBUG',
         '--name=DinoGame',
     ]
