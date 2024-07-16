@@ -1,101 +1,128 @@
 import pygame
 import random
+import sys
+import time
 
-# Initialize pygame
+# Initialize Pygame
 pygame.init()
 
-# Screen dimensions
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-FPS = 60
+# Set up display
+width, height = 800, 800
+window = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Piano Music Go")
 
-# Colors
+# Define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+TILE_COLOR = (0, 0, 255)
+KEY_COLORS = [WHITE] * 8  # Default colors for keys
+KEY_TIMERS = [0] * 8  # Timer for each key to reset color
 
-# Set up the display
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('Piano EDM')
+# Load sounds
+sounds = {
+    0: pygame.mixer.Sound("sounds/piano-C4.wav"),
+    1: pygame.mixer.Sound("sounds/piano-D4.wav"),
+    2: pygame.mixer.Sound("sounds/piano-E4.wav"),
+    3: pygame.mixer.Sound("sounds/piano-F4.wav"),
+    4: pygame.mixer.Sound("sounds/piano-G4.wav"),
+    5: pygame.mixer.Sound("sounds/piano-A4.wav"),
+    6: pygame.mixer.Sound("sounds/piano-B4.wav"),
+    7: pygame.mixer.Sound("sounds/piano-C5.wav")
+}
 
-# Note settings
-NOTE_WIDTH = 50
-NOTE_HEIGHT = 20
-NOTE_SPEED = 5
+# Define tile properties
+num_keys = 8
+tile_width = width // num_keys
+tile_height = 150
+tile_speed = 5
 
-# Scoring zone
-SCORING_ZONE_Y = SCREEN_HEIGHT - 100
+# Define key bindings and labels
+key_bindings = [pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_SEMICOLON]
+key_labels = ['A', 'S', 'D', 'F', 'J', 'K', 'L', ';']
 
-# Font
-font = pygame.font.Font(None, 36)
+# Generate initial tiles
+tiles = []
+for i in range(5):
+    x = random.randint(0, num_keys - 1) * tile_width
+    y = -tile_height - i * (tile_height + 20)
+    tiles.append(pygame.Rect(x, y, tile_width, tile_height))
 
-# Note class
-class Note:
-    def __init__(self, x, y, length=1):
-        self.rect = pygame.Rect(x, y, NOTE_WIDTH, NOTE_HEIGHT * length)
-        self.length = length
+# Function to draw piano keys at the bottom
+def draw_piano_keys():
+    for i in range(num_keys):
+        x = i * tile_width
+        rect = pygame.Rect(x, height - tile_height, tile_width, tile_height)
+        pygame.draw.rect(window, KEY_COLORS[i], rect)
+        pygame.draw.rect(window, BLACK, rect, 2)
+        font = pygame.font.SysFont(None, 40)
+        label = font.render(key_labels[i], True, BLACK)
+        label_rect = label.get_rect(center=(x + tile_width // 2, height - tile_height // 2))
+        window.blit(label, label_rect)
 
-    def update(self):
-        self.rect.y += NOTE_SPEED
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, RED, self.rect)
-
-# Generate random notes
-def generate_note():
-    x = random.randint(0, SCREEN_WIDTH - NOTE_WIDTH)
-    length = random.choice([1, 2, 3])  # Note lengths
-    return Note(x, -NOTE_HEIGHT * length, length)
-
-# Main game loop
-def game_loop():
-    clock = pygame.time.Clock()
-    notes = [generate_note() for _ in range(10)]
-    score = 0
-    running = True
-    held_note = None
-
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+# Game loop
+score = 0
+running = True
+while running:
+    window.fill(BLACK)
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    for note in notes:
-                        if scoring_zone_y <= note.rect.y + note.rect.height <= scoring_zone_y + NOTE_HEIGHT:
-                            score += 10 * note.length
-                            held_note = note
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:
-                    held_note = None
+            keys = pygame.key.get_pressed()
+            for i, key in enumerate(key_bindings):
+                if event.key == key:
+                    hit = False
+                    for tile in tiles:
+                        if tile.collidepoint(i * tile_width + tile_width // 2, height - tile_height):
+                            sounds[i].play()
+                            tiles.remove(tile)
+                            KEY_COLORS[i] = GREEN
+                            KEY_TIMERS[i] = pygame.time.get_ticks() + 200  # Reset color after 200ms
+                            score += 1
+                            hit = True
+                            break
+                    if not hit:
+                        KEY_COLORS[i] = RED
+                        KEY_TIMERS[i] = pygame.time.get_ticks() + 200  # Reset color after 200ms
 
-        screen.fill(BLACK)
+    # Move tiles down
+    for tile in tiles:
+        tile.y += tile_speed
 
-        for note in notes:
-            note.update()
-            note.draw(screen)
-            if note.rect.y > SCREEN_HEIGHT:
-                notes.remove(note)
-                notes.append(generate_note())
+    # Check for missed tiles
+    tiles = [tile for tile in tiles if tile.y <= height]
 
-        # Handle held notes
-        if held_note:
-            held_note.update()
-            if held_note.rect.y > SCREEN_HEIGHT:
-                held_note = None
+    # Generate new tiles
+    while len(tiles) < 5:
+        x = random.randint(0, num_keys - 1) * tile_width
+        y = random.randint(-tile_height * 5, -tile_height)
+        tiles.append(pygame.Rect(x, y, tile_width, tile_height))
 
-        # Draw scoring zone
-        pygame.draw.rect(screen, GREEN, (0, SCORING_ZONE_Y, SCREEN_WIDTH, NOTE_HEIGHT), 2)
+    # Reset key colors after the timer expires
+    current_time = pygame.time.get_ticks()
+    for i in range(num_keys):
+        if KEY_COLORS[i] in [GREEN, RED] and current_time >= KEY_TIMERS[i]:
+            KEY_COLORS[i] = WHITE
 
-        # Display score
-        score_text = font.render(f'Score: {score}', True, WHITE)
-        screen.blit(score_text, (10, 10))
+    # Draw tiles
+    for tile in tiles:
+        pygame.draw.rect(window, TILE_COLOR, tile)
+    
+    # Draw piano keys
+    draw_piano_keys()
 
-        pygame.display.flip()
-        clock.tick(FPS)
+    # Display score
+    font = pygame.font.SysFont(None, 55)
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    window.blit(score_text, (10, 10))
 
-    pygame.quit()
+    pygame.display.flip()
+    pygame.time.delay(30)
 
-if __name__ == '__main__':
-    game_loop()
+pygame.quit()
+sys.exit()
