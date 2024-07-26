@@ -6,7 +6,7 @@ pygame.init()
 
 # Screen dimensions
 SCREEN_WIDTH = 300
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = 900  # Increased height for easier gameplay
 BLOCK_SIZE = 30
 
 # Colors
@@ -106,7 +106,7 @@ class Tetris:
 
     def update(self):
         self.fall_time += 1
-        if self.fall_time >= 10:
+        if self.fall_time >= 10:  # Slower falling speed
             self.shape_y += 1
             if not self.valid_space():
                 self.shape_y -= 1
@@ -123,7 +123,7 @@ class Tetris:
 
     def draw_score(self):
         score_text = self.font.render(f'Score: {self.score}', True, WHITE)
-        self.screen.blit(score_text, (10, 10))
+        self.screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
 
 def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
