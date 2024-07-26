@@ -39,7 +39,9 @@ class Tetris:
         self.screen = screen
         self.grid = [[BLACK for _ in range(SCREEN_WIDTH // BLOCK_SIZE)] for _ in range(SCREEN_HEIGHT // BLOCK_SIZE)]
         self.current_shape = self.get_new_shape()
+        self.next_shape = self.get_new_shape()  # Next shape
         self.current_shape_color = random.choice(SHAPE_COLORS)
+        self.next_shape_color = random.choice(SHAPE_COLORS)  # Next shape color
         self.shape_x = SCREEN_WIDTH // BLOCK_SIZE // 2 - len(self.current_shape[0]) // 2
         self.shape_y = 0
         self.fall_time = 0
@@ -64,6 +66,15 @@ class Tetris:
                     pygame.draw.rect(self.screen, WHITE,
                                      ((self.shape_x + x) * BLOCK_SIZE, (self.shape_y + y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 1)
 
+    def draw_next_shape(self):
+        for y, row in enumerate(self.next_shape):
+            for x, val in enumerate(row):
+                if val == 1:
+                    pygame.draw.rect(self.screen, self.next_shape_color,
+                                     (SCREEN_WIDTH + 20 + x * BLOCK_SIZE, 50 + 40 + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 0)
+                    pygame.draw.rect(self.screen, WHITE,
+                                     (SCREEN_WIDTH + 20 + x * BLOCK_SIZE, 50 + 40 + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 1)
+
     def valid_space(self):
         for y, row in enumerate(self.current_shape):
             for x, val in enumerate(row):
@@ -80,8 +91,10 @@ class Tetris:
             for x, val in enumerate(row):
                 if val == 1:
                     self.grid[self.shape_y + y][self.shape_x + x] = self.current_shape_color
-        self.current_shape = self.get_new_shape()
-        self.current_shape_color = random.choice(SHAPE_COLORS)
+        self.current_shape = self.next_shape  # Move next shape to current
+        self.current_shape_color = self.next_shape_color  # Move next shape color to current
+        self.next_shape = self.get_new_shape()  # Generate new next shape
+        self.next_shape_color = random.choice(SHAPE_COLORS)  # Generate new next shape color
         self.shape_x = SCREEN_WIDTH // BLOCK_SIZE // 2 - len(self.current_shape[0]) // 2
         self.shape_y = 0
         if not self.valid_space():
@@ -119,14 +132,15 @@ class Tetris:
         self.draw_grid()
         self.draw_shape()
         self.draw_score()
+        self.draw_next_shape()
         pygame.display.update()
 
     def draw_score(self):
         score_text = self.font.render(f'Score: {self.score}', True, WHITE)
-        self.screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
+        self.screen.blit(score_text, (SCREEN_WIDTH + 20, 10))
 
 def main():
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((SCREEN_WIDTH + 150, SCREEN_HEIGHT))  # Extra width for next shape hint
     pygame.display.set_caption("Tetris")
     clock = pygame.time.Clock()
     game = Tetris(screen)
